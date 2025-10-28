@@ -31,7 +31,7 @@ WiFiClientSecure espClient;
 PubSubClient client(espClient);
 
 int mainLoopCounter;
-const int DELAY_MQTT_PUBLISH = 100000;//Loop Cycles
+const int DELAY_MQTT_PUBLISH = 1000000;//Loop Cycles
 const int DELAY_DISPLAY_UPDATE = 5000;//Loop Cycles
 
 char mqtt_buffer[40];
@@ -157,7 +157,7 @@ void loop() {
     }
     read_unit_env();
     //Publish Battery Voltage to MQTT
-    int voltage = M5.Power.getBatteryVoltage();
+    int voltage = M5.Power.getBatteryLevel();
     send_mqtt_message(mqtt_battery + "1", &voltage);
     sprintf(mqtt_buffer, "%d", voltage);
     client.publish(mqtt_battery.c_str(), mqtt_buffer);
@@ -188,8 +188,8 @@ void loop() {
         client.publish(mqtt_gyro_x.c_str(), mqtt_buffer);
         sprintf(mqtt_buffer, "%0.2f", data.gyro.y);
         client.publish(mqtt_gyro_y.c_str(), mqtt_buffer);
-        sprintf(mqtt_buffer, "%0.2f", data.gyro.z);
-        
+        sprintf(mqtt_buffer, "%0.2f", data.gyro.z); 
+        client.publish(mqtt_gyro_z.c_str(), mqtt_buffer);
     }
     mainLoopCounter = 0;
   }
