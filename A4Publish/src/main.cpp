@@ -11,6 +11,21 @@ const char *mqtt_broker = "p07da41d.ala.us-east-1.emqxsl.com";
 const int mqtt_port = 8883;
 
 
+const char* topicDefault = "SENG3030/Thursday/Ejolliffe4411/#";
+int carsolCounter = -1;
+
+const char* battery = "battery";
+const char* sht40 = "sht40";
+const char* bmp280 = "bmp280";
+const char* temperature = "temperature";
+const char* humidity = "humidity";
+const char* pressure = "pressure";
+const char* accel = "accel";
+const char* gyro = "gyro";
+const char* x = "x";
+const char* z = "z";
+
+
 const std::string mqtt_base = "SENG3030/Thursday/" + mqtt_username + "/";
 const std::string mqtt_battery = mqtt_base + "battery";
 
@@ -272,7 +287,13 @@ int get_Button_Presses(void)
 {
   M5.update();  // Required to get states
   if (M5.BtnA.wasPressed()) {
-      return 1;
+    carsolCounter+= 1;
+
+    if(carsolCounter > 4)
+    {
+      carsolCounter = 0;
+    }  
+    return 1;
   }
   if (M5.BtnB.wasPressed()) {
       return 2;
@@ -365,5 +386,153 @@ void mqttCallback(char *topic, byte *payload, unsigned int length) {
     }
     Serial.println();
     Serial.println("-----------------------");
+
+    switch (carsolCounter)
+    {
+    case 0: // BATTERY----------------------------------------
+
+    if(strstr(topic, battery) != NULL)
+      {
+        M5.Display.clear();
+        M5.Display.setCursor(10, 30);
+        M5.Display.print("BAT: %");
+        for (unsigned int i = 0; i < length; i++) 
+        {
+          M5.Display.print((char) payload[i]);
+        }
+      }
+      break;
+    
+    case 1: // TEMP & HUMD-------------------------------------
+      if(strstr(topic, sht40) != NULL)
+      {
+        if(strstr(topic, temperature) != NULL)
+        {
+          M5.Display.clear();
+          M5.Display.setCursor(10, 30);
+          M5.Display.print("Temperature: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+
+         if(strstr(topic, humidity) != NULL)
+        {
+          M5.Display.println();
+          M5.Display.print("Humidity: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+      }
+      break;
+
+    case 2: // TEMP AND PRESS-----------------------------------
+      if(strstr(topic, bmp280) != NULL)
+      {
+        if(strstr(topic, temperature) != NULL)
+        {
+          M5.Display.clear();
+          M5.Display.setCursor(10, 30);
+          M5.Display.print("Temperature: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+
+         if(strstr(topic, pressure) != NULL)
+        {
+          M5.Display.println();
+          M5.Display.print("Pressure: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+      }
+      break;
+    
+    case 3: // ACCEL------------------------------------------
+      if(strstr(topic, accel) != NULL)
+      {
+        if(strstr(topic, x) != NULL)
+        {
+          M5.Display.clear();
+          M5.Display.setCursor(10, 30);
+          M5.Display.print("Accel X: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+
+        int temp = strlen(topic);
+        if(topic[temp-1] =='y')
+        {
+          M5.Display.println();
+          M5.Display.print("Accel Y: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+
+        if(strstr(topic, z) != NULL)
+        {
+          M5.Display.println();
+          M5.Display.print("Accel Z: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+      }
+      break;
+    
+    case 4: // GYRO
+      if(strstr(topic, gyro) != NULL)
+      {
+        if(strstr(topic, x) != NULL)
+        {
+          M5.Display.clear();
+          M5.Display.setCursor(10, 30);
+          M5.Display.print("Gyro X: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+
+        int temp = strlen(topic);
+        if(topic[temp-1] =='y')
+        {
+          M5.Display.println();
+          M5.Display.print("Gyro Y: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+
+        if(strstr(topic, z) != NULL)
+        {
+          M5.Display.println();
+          M5.Display.print("Gyro Z: ");
+          for (unsigned int i = 0; i < length; i++) 
+          {
+            M5.Display.print((char) payload[i]);
+          }
+        }
+      }
+      break;
+    
+    
+    default:
+      break;
+    }
+   
 }
 
